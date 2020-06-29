@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Debug;
 
 namespace demo
 {
@@ -36,16 +37,27 @@ namespace demo
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory, DemoContext db)
+        public void Configure(IApplicationBuilder app, IServiceCollection loggerFactory, DemoContext db)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
+            //loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+            //loggerFactory.AddDebug();
+            ConfigureLogging(loggerFactory);
 
             CreateData(db);
 
             app.UseFileServer();
 
             app.UseMvc();
+        }
+
+        private IServiceCollection ConfigureLogging(IServiceCollection factory)
+        {
+            factory.AddLogging(opt =>
+            {
+                opt.AddDebug();
+                opt.AddConsole();
+            });
+            return factory;
         }
 
         private static void CreateData(DemoContext db)
